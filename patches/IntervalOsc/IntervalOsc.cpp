@@ -26,13 +26,9 @@ class IntervalOscPatch
 				oscs_[i].SetWaveform(BlOsc::Waveforms::WAVE_SAW);
 			}
 
-			osc_sub_.Init(sr);
-			osc_sub_.SetAmp(0.9);
-			osc_sub_.SetWaveform(BlOsc::Waveforms::WAVE_TRIANGLE);
-
 			button_.Init(hw.B7);
 			switch_.Init(hw.B8);
-			smooth_coef_ = 1.0 / (sr * 0.002);
+			smooth_coef_ = 1.0 / (sr * 0.001);
 		}
 
 		void Update(DaisyPatchSM &hw)
@@ -48,46 +44,46 @@ class IntervalOscPatch
 
 			// -- Pitch --
 
+			bool harmonic_mode = switch_.Pressed();
+
 			// Knobs
-			float base_nn_in = roundf(fmap(hw.GetAdcValue(CV_1), 33.0, 81.0)); // A1 - A5
-			float offset_nn_in = roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
+			float base_in = roundf(fmap(hw.GetAdcValue(CV_1), 33.0, 81.0)); // A1 - A5
+			float offset_in = harmonic_mode ? 
+				roundf(fmap(hw.GetAdcValue(CV_2), -2, 15.0)) :
+				roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
 			float detune_in = fmap(hw.GetAdcValue(CV_3), 0.0, 0.2);
 
 			// CV Ins
-			base_nn_in += hw.GetAdcValue(CV_5) * 60.0; // 5 octaves plus/minus
-			offset_nn_in += round(hw.GetAdcValue(CV_6) * 24.0);
+			base_in += hw.GetAdcValue(CV_5) * 60.0; // 5 octaves plus/minus
+			offset_in += round(hw.GetAdcValue(CV_6) * 24.0);
 
 			// Post-map smoothing
-			fonepole(base_nn_, base_nn_in, smooth_coef_);
-			fonepole(offset_nn_, offset_nn_in, smooth_coef_);
+			fonepole(base_, base_in, smooth_coef_);
+			fonepole(offset_, offset_in, smooth_coef_);
 
-			oscs_[0].SetFreq(mtof(base_nn_ - detune_in));
-			oscs_[1].SetFreq(mtof(base_nn_ + offset_nn_ + detune_in));
-			osc_sub_.SetFreq(mtof(base_nn_ - 12));
+			oscs_[0].SetFreq(mtof(base_ - detune_in));
+			if (harmonic_mode)
+			{
+				float scale = offset_in >= 0.0 ? offset_in + 1.0 : 1.0 / -(offset_in * 2.0);
+				oscs_[1].SetFreq(mtof(base_ + detune_in) * scale);
+			}
+			else
+			{
+				oscs_[1].SetFreq(mtof(base_ + offset_ + detune_in));
+			}
 
 			// -- Color --
-
+			float color_in = fclamp(hw.GetAdcValue(CV_4) + hw.GetAdcValue(CV_8), 0.0, 1.0);
+			oscs_[0].SetPw(color_in);
+			oscs_[1].SetPw(color_in);
 		}
 
 		void FillBuffers(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 		{
-			// Sum + Subosc
-			if (switch_.Pressed())
+			for (size_t i = 0; i < size; i++)
 			{
-				for (size_t i = 0; i < size; i++)
-				{
-					OUT_L[i] = (oscs_[0].Process() + oscs_[1].Process()) * 0.5; 
-					OUT_R[i] = osc_sub_.Process();
-				}
-			}
-			// Separate outs
-			else
-			{
-				for (size_t i = 0; i < size; i++)
-				{
-					OUT_L[i] = oscs_[0].Process(); 
-					OUT_R[i] = oscs_[1].Process();
-				}
+				OUT_L[i] = oscs_[0].Process(); 
+				OUT_R[i] = oscs_[1].Process();
 			}
 		}
 
@@ -104,7 +100,6 @@ class IntervalOscPatch
 		};
 
 		BlOsc oscs_[2];
-		BlOsc osc_sub_;
 
 		Switch button_;
 		Switch switch_;
@@ -112,8 +107,8 @@ class IntervalOscPatch
 		uint8_t waveMode_ = 0;
 
 		bool has_init_pitches_ = false;
-		float base_nn_;
-		float offset_nn_;
+		float base_;
+		float offset_;
 		float smooth_coef_;
 
 		void nextWaveMode() {
