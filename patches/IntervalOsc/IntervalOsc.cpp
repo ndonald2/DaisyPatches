@@ -2,8 +2,8 @@
 #include "daisy_patch_sm.h"
 #include "daisysp.h"
 
-#define DSP_BLK_SIZE 4
-#define DSP_SR SaiHandle::Config::SampleRate::SAI_48KHZ
+#define DSP_BLK_SIZE 4 
+#define DSP_SR SaiHandle::Config::SampleRate::SAI_96KHZ
 
 using namespace daisy;
 using namespace patch_sm;
@@ -47,7 +47,7 @@ class IntervalOscPatch
 			bool harmonic_mode = switch_.Pressed();
 
 			// Knobs
-			float base_in = roundf(fmap(hw.GetAdcValue(CV_1), 33.0, 81.0)); // A1 - A5
+			float base_in = roundf(fmap(hw.GetAdcValue(CV_1), 28.0, 84.0)); // E1 - C6 
 			float offset_in = harmonic_mode ? 
 				roundf(fmap(hw.GetAdcValue(CV_2), -2, 15.0)) :
 				roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
