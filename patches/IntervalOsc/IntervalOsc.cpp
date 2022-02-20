@@ -18,6 +18,7 @@ class IntervalOscPatch
 		void Init(DaisyPatchSM &hw)
 		{
 			float sr = hw.AudioSampleRate();
+
 			for (size_t i = 0; i < 2; i++) {
 				oscs_[i].Init(sr);
 				oscs_[i].SetAmp(0.5);
@@ -25,7 +26,6 @@ class IntervalOscPatch
 			}
 
 			button_.Init(hw.B7);
-
 			smooth_coef_ = 1.0 / (sr * 0.002);
 		}
 
@@ -42,6 +42,7 @@ class IntervalOscPatch
 			// Knobs
 			float base_nn_in = roundf(fmap(hw.GetAdcValue(CV_1), 33.0, 81.0)); // A1 - A5
 			float offset_nn_in = roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
+			float detune_in = fmap(hw.GetAdcValue(CV_3), 0.0, 0.2);
 
 			// CV Ins
 			base_nn_in += hw.GetAdcValue(CV_5) * 60.0; // 5 octaves plus/minus
@@ -51,10 +52,11 @@ class IntervalOscPatch
 			fonepole(base_nn_, base_nn_in, smooth_coef_);
 			fonepole(offset_nn_, offset_nn_in, smooth_coef_);
 
-			oscs_[0].SetFreq(mtof(base_nn_));
-			oscs_[1].SetFreq(mtof(base_nn_ + offset_nn_));
+			oscs_[0].SetFreq(mtof(base_nn_ - detune_in));
+			oscs_[1].SetFreq(mtof(base_nn_ + offset_nn_ + detune_in));
 
 			// -- Color --
+
 		}
 
 		void FillBuffers(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
@@ -75,7 +77,9 @@ class IntervalOscPatch
 			MODE_RECT_TRI,
 			MODE_LAST
 		};
+
 		BlOsc oscs_[2];
+
 		Switch button_;
 		uint8_t waveMode_ = 0;
 
