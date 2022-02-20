@@ -17,26 +17,42 @@ class IntervalOscPatch
 
 		void Init(DaisyPatchSM &hw)
 		{
-			button_.Init(hw.B7);
+			float sr = hw.AudioSampleRate();
 			for (size_t i = 0; i < 2; i++) {
-				oscs_[i].Init(hw.AudioSampleRate());
+				oscs_[i].Init(sr);
 				oscs_[i].SetAmp(0.5);
 				oscs_[i].SetWaveform(BlOsc::Waveforms::WAVE_SAW);
 			}
+
+			button_.Init(hw.B7);
+
+			smooth_coef_ = 1.0 / (sr * 0.002);
 		}
 
 		void Update(DaisyPatchSM &hw) {
 			// -- Wave Mode --
 			button_.Debounce();
+
 			if (button_.RisingEdge()) {
 				nextWaveMode();	
 			}
 
 			// -- Pitch --
-			float base_nn = roundf(fmap(hw.GetAdcValue(CV_1), 21, 81));
-			float offset_nn = roundf(fmap(hw.GetAdcValue(CV_2), -12, 12));
-			oscs_[0].SetFreq(mtof(base_nn));
-			oscs_[1].SetFreq(mtof(base_nn + offset_nn));
+
+			// Knobs
+			float base_nn_in = roundf(fmap(hw.GetAdcValue(CV_1), 33.0, 81.0)); // A1 - A5
+			float offset_nn_in = roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
+
+			// CV Ins
+			base_nn_in += hw.GetAdcValue(CV_5) * 60.0; // 5 octaves plus/minus
+			offset_nn_in += round(hw.GetAdcValue(CV_6) * 24.0);
+
+			// Post-map smoothing
+			fonepole(base_nn_, base_nn_in, smooth_coef_);
+			fonepole(offset_nn_, offset_nn_in, smooth_coef_);
+
+			oscs_[0].SetFreq(mtof(base_nn_));
+			oscs_[1].SetFreq(mtof(base_nn_ + offset_nn_));
 
 			// -- Color --
 		}
@@ -62,6 +78,11 @@ class IntervalOscPatch
 		BlOsc oscs_[2];
 		Switch button_;
 		uint8_t waveMode_ = 0;
+
+		bool has_init_pitches_ = false;
+		float base_nn_;
+		float offset_nn_;
+		float smooth_coef_;
 
 		void nextWaveMode() {
 			waveMode_ = (waveMode_ + 1) % MODE_LAST;
@@ -117,6 +138,8 @@ int main(void)
 	hw.StartAudio(AudioCallback);
 
 	patch.Init(hw);
+
+	// hw.StartLog(true);
 
 	while (1) {}
 }
