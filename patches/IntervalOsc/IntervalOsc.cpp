@@ -31,19 +31,18 @@ class IntervalOscPatch
 			smooth_coef_ = 1.0 / (sr * 0.001);
 		}
 
-		void Update(DaisyPatchSM &hw)
-		{
-			// -- Wave Mode --
+		void ProcessButton() {
 			button_.Debounce();
-			switch_.Debounce();
-
 			if (button_.RisingEdge())
 			{
 				nextWaveMode();	
 			}
+		}
 
+		void Update(DaisyPatchSM &hw)
+		{
 			// -- Pitch --
-
+			switch_.Debounce();
 			bool harmonic_mode = switch_.Pressed();
 
 			// Knobs
@@ -168,5 +167,8 @@ int main(void)
 
 	// hw.StartLog(true);
 
-	while (1) {}
+	while (1) {
+		patch.ProcessButton();
+		System::Delay(1);
+	}
 }
