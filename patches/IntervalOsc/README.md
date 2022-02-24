@@ -14,6 +14,10 @@ according to two different modes. The controls are nearly identical in both mode
 The CV_1 control for base frequency is quantized to standard `A=440Hz` semitones, meaning in the absence of any CV input on CV_5 jack,
 the oscillators will always be "in tune" with standard `A=440Hz` equal temperament tuning.
 
+---
+
+## Controls
+
 ### Inputs
 
 |    Name   |    Type      |    Description                                   |    Range    |
@@ -31,6 +35,8 @@ the oscillators will always be "in tune" with standard `A=440Hz` equal temperame
 
 All other inputs/controls unused.
 
+<br>
+
 ### Outputs
 
 |    Name    |    Description         |
@@ -39,6 +45,10 @@ All other inputs/controls unused.
 |  OUT_R[i]  |   Oscillator 2 output  |
 
 All other outputs unused.
+
+---
+
+## Modes
 
 ### Interval / Equal Temperament Mode (B8 Switch Down)
 
@@ -69,9 +79,13 @@ Pushing the button (B7) will cycle through various subtractive-style waveforms f
 
 |  Oscillator 1  |  Oscillator 2  |
 |  ---           |  ---           |
+|  Sin           |  Sin           |
+|  Tri           |  Tri           |
 |  Saw           |  Saw           |
 |  Rect          |  Rect          |
-|  Tri           |  Tri           |
-|  Saw           |  Rect          |
+|  Saw           |  Sin           |
 |  Saw           |  Tri           |
+|  Saw           |  Rect          |
+|  Rect          |  Sin           |
 |  Rect          |  Tri           |
+|  Rect          |  Saw           |
