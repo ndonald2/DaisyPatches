@@ -35,19 +35,23 @@ public:
         smooth_coef_ = 1.0 / (sr * 0.001);
     }
 
-    void ProcessButton()
+    void ProcessSwitches()
     {
         button_.Debounce();
+        switch_.Debounce();
+
         if (button_.RisingEdge())
         {
             nextWaveMode();
+        } else if (button_.TimeHeldMs() > 1000) {
+            waveMode_ = 0;
+            updateWaveforms();
         }
     }
 
     void Update(DaisyPatchSM &hw)
     {
         // -- Pitch --
-        switch_.Debounce();
         bool harmonic_mode = switch_.Pressed();
 
         // Knobs
@@ -147,6 +151,10 @@ private:
     void nextWaveMode()
     {
         waveMode_ = (waveMode_ + 1) % MODE_LAST;
+        updateWaveforms();
+    }
+
+    void updateWaveforms() {
         switch (waveMode_)
         {
         case MODE_SIN_SIN:
@@ -215,7 +223,9 @@ int main(void)
 
     while (1)
     {
-        intervalOsc.ProcessButton();
+        // Process physical switch/button at slower interval
+        // bc doing so at audio rate outruns debounce prevention algo
+        intervalOsc.ProcessSwitches();
         System::Delay(1);
     }
 }

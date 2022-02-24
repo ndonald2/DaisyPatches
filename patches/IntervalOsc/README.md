@@ -30,7 +30,7 @@ the oscillators will always be "in tune" with standard `A=440Hz` equal temperame
 |    CV_6   |  CV In Jack  |    CV input for second oscillator offset. Quantized - behavior depends on mode (read below) | -5V – +5V |
 |    CV_7   |  CV In Jack  |    TBD (currently unused) | N/A |
 |    CV_8   |  CV In Jack  |    CV pulse width modulation input for both oscillators (only applies when wave shape is rectangle) | -5V – +5V |
-|    B7     |  Button      |    Push to cycle through oscillator modes (see table below) | N/A |
+|    B7     |  Button      |    Push to cycle through waveforms (see table below). Hold for >1 second to reset to first wave mode. | N/A |
 |    B8     |  Switch      |    Select patch mode - Down = Interval Mode, Up = Pure Harmonic Mode | N/A |
 
 All other inputs/controls unused.
@@ -71,9 +71,10 @@ frequencies. Changing the offset (CV_2 knob + CV_6 voltage input) will change th
 This mode is especially useful for audio rate cross-modulation synthesis techniques, e.g. using Mutable Instruments Warps, in which the output of the
 cross-modulation will be less inharmonic if the fundamental frequency of both input signals are in exact- or nearly-exact harmonic ratios.
 
-### Oscillator Modes
+### Waveform Configurations 
 
 Pushing the button (B7) will cycle through various subtractive-style waveforms for both oscillators in this order.
+Holding the button for >1 second will reset back to the first mode (sin-sin).
 
 |  Oscillator 1  |  Oscillator 2  |
 |  ---           |  ---           |
