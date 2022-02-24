@@ -35,8 +35,6 @@ the oscillators will always be "in tune" with standard `A=440Hz` equal temperame
 
 All other inputs/controls unused.
 
-<br>
-
 ### Outputs
 
 |    Name    |    Description         |
