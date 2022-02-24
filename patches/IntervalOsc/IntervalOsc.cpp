@@ -105,7 +105,6 @@ class IntervalOscPatch
 
 		uint8_t waveMode_ = 0;
 
-		bool has_init_pitches_ = false;
 		float base_;
 		float offset_;
 		float smooth_coef_;
