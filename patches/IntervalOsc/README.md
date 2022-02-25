@@ -62,7 +62,7 @@ By sequencing both CV_5 (base frequency) and CV_6 (interval offset) inputs, a 2-
 ### Pure Harmonic / Just Intonation Mode (B8 Switch Up)
 
 In this mode the frequency of the second oscillator will always be a rational small-integer ratio multiple of the frequency of the first oscillator.
-In practice this achieves a subset of just intonation pitch intervals, most of which are pure harmonic intervals (integer or integer-reciprocal multiples) of
+In practice this achieves a subset of just intonation pitch intervals, many of which are pure harmonic intervals (integer or integer-reciprocal multiples) of
 the frequency of the first oscillator.
 
 Changing the base frequency (CV_1 knob + CV_5 voltage input) will change the frequency of both oscillators while preserving the geometric ratio of their

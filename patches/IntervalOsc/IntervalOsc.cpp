@@ -9,11 +9,26 @@ using namespace daisy;
 using namespace patch_sm;
 using namespace daisysp;
 
-class IntervalOscPatch
+const float FREQ_RATIOS[] = {
+    // Sub-octave just ratios
+    1./4.,   1./2.,  2./3.,  3./4.,
+    // First octave just ratios
+    1.,      5./4.,  4./3.,  3./2.,  5./3.,
+    // Second octave just ratios
+    2.,      5./2.,  8./3.,  3.,     10/3.,
+    // Exact harmonic ratios (3-4 octaves)
+    4., 5., 6., 7., 8.,
+    // Exact harmonic ratios (4-5 octaves)
+    9., 10., 11., 12., 13., 14., 15., 16.
+};
+
+const size_t NUM_FREQ_RATIOS = DSY_COUNTOF(FREQ_RATIOS);
+
+class IntervalOsc
 {
 
 public:
-    IntervalOscPatch() {}
+    IntervalOsc() {}
 
     void Init(DaisyPatchSM &hw)
     {
@@ -56,30 +71,33 @@ public:
 
         // Knobs
         float base_in = roundf(fmap(hw.GetAdcValue(CV_1), 28.0, 84.0)); // E1 - C6
-        float offset_in = harmonic_mode ? roundf(fmap(hw.GetAdcValue(CV_2), -2, 15.0)) : roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
+        float offset_in = harmonic_mode ?
+            roundf(fmap(hw.GetAdcValue(CV_2), 0, NUM_FREQ_RATIOS - 1)) :
+            roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
         float detune_in = fmap(hw.GetAdcValue(CV_3), 0.0, 0.25);
 
         // CV Ins
         base_in += hw.GetAdcValue(CV_5) * 60.0; // 5 octaves plus/minus
-        offset_in += round(hw.GetAdcValue(CV_6) * 24.0);
+        offset_in += round(hw.GetAdcValue(CV_6) * (NUM_FREQ_RATIOS - 1));
 
-        // Post-map smoothing
         fonepole(base_, base_in, smooth_coef_);
-        fonepole(offset_, offset_in, smooth_coef_);
-
         float base_freq = mtof(base_ - detune_in);
         oscs_[0].SetFreq(base_freq);
         sin_oscs_[0].SetFreq(base_freq);
 
         if (harmonic_mode)
         {
-            float scale = offset_in >= 0.0 ? offset_in + 1.0 : 1.0 / -(offset_in * 2.0);
-            float scaled_freq = mtof(base_ + detune_in) * scale;
+            size_t ratio_idx = static_cast<size_t>(offset_in);
+            ratio_idx = DSY_CLAMP(ratio_idx, 0, NUM_FREQ_RATIOS - 1);
+            float scale_in = FREQ_RATIOS[ratio_idx];
+            fonepole(offset_, scale_in, smooth_coef_);
+            float scaled_freq = mtof(base_ + detune_in) * offset_;
             oscs_[1].SetFreq(scaled_freq);
             sin_oscs_[1].SetFreq(scaled_freq);
         }
         else
         {
+            fonepole(offset_, offset_in, smooth_coef_);
             float interval_freq = mtof(base_ + offset_ + detune_in);
             oscs_[1].SetFreq(interval_freq);
             sin_oscs_[1].SetFreq(interval_freq);
@@ -104,6 +122,7 @@ public:
     }
 
 private:
+
     enum WaveModes
     {
         MODE_SIN_SIN,
@@ -200,8 +219,10 @@ private:
     }
 };
 
+// ---
+
 DaisyPatchSM hw;
-IntervalOscPatch intervalOsc;
+IntervalOsc intervalOsc;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size)
 {
