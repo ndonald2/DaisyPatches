@@ -2,6 +2,8 @@
 
 Dual oscillator with interval offset for Daisy Patch.Init()
 
+📺 [Video Demo](https://github.com/ndonald2/DaisyPatches/tree/main/patches/IntervalOsc)
+
 ## Author
 
 Nick Donaldson (Kip Schwinger)
