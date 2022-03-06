@@ -69,7 +69,7 @@ In this mode the frequency of the second oscillator will always be a rational sm
 In practice this achieves a subset of just intonation pitch intervals, many of which are rational intervals (integer or integer-reciprocal multiples) of
 the frequency of the first oscillator.
 
-Changing the base frequency (CV_1 knob + CV_5 voltage input) will change the frequency of both oscillators while preserving the geometric ratio of their
+Changing the base frequency (CV_1 knob + CV_5 voltage input) will change the frequency of both oscillators while preserving the ratio of their
 frequencies. Changing the offset (CV_2 knob + CV_6 voltage input) will change the frequency multiplication factor for the second oscillator.
 
 This mode is especially useful for audio rate cross-modulation synthesis techniques, e.g. using Mutable Instruments Warps, in which the output of the
