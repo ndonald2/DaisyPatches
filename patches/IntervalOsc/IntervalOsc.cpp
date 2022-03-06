@@ -47,7 +47,7 @@ public:
 
         button_.Init(hw.B7);
         switch_.Init(hw.B8);
-        smooth_coef_ = 1.0 / (sr * 0.001);
+        smooth_coef_ = 1.0 / (sr * 0.0001);
     }
 
     void ProcessSwitches()
