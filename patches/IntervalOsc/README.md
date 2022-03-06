@@ -48,7 +48,7 @@ All other outputs unused.
 
 ## Modes
 
-### Interval(Equal Temperament) Mode
+### Interval (Equal Temperament) Mode
 
 _Active when B8 switch is DOWN_
 
