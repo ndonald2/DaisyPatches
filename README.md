@@ -18,5 +18,10 @@ patch's folder in VSCode and run the `build all` task at least once to build `li
 `daisySP` dependencies. From then on you can just run the `build` task to compile the code or
 `build_and_upload_dfu` to program the board.
 
-**Unless otherwise indicated, all patches are for Daisy Patch Submodule (implied to be attached to 
-Patch.init() module)**
+_Unless otherwise indicated, all patches are for Daisy Patch Submodule (implied to be attached to 
+Patch.init() module)_
+
+You can also program patches by running
+
+* `bin/program patch_name` for STLink programming
+* `bin/program-dfu patch_name' for USB/DFU programming

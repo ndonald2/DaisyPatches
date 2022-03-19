@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eo pipefail
+
+PATCH_NAME=$1
+
+echo -e "Programming $PATCH_NAME..."
+cd patches/$PATCH_NAME
+
+make clean
+make
+make program-dfu
