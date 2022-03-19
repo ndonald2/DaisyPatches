@@ -24,4 +24,4 @@ Patch.init() module)_
 You can also program patches by running
 
 * `bin/program patch_name` for STLink programming
-* `bin/program-dfu patch_name' for USB/DFU programming
+* `bin/program-dfu patch_name` for USB/DFU programming
