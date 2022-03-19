@@ -70,7 +70,7 @@ public:
         bool harmonic_mode = switch_.Pressed();
 
         // Knobs
-        float base_in = roundf(fmap(hw.GetAdcValue(CV_1), 28.0, 84.0)); // E1 - C6
+        float base_in = fmap(hw.GetAdcValue(CV_1), 28.0, 84.0); // E1 - C6
         float offset_in = harmonic_mode ?
             roundf(fmap(hw.GetAdcValue(CV_2), 0, NUM_FREQ_RATIOS - 1)) :
             roundf(fmap(hw.GetAdcValue(CV_2), -24.0, 24.0));
