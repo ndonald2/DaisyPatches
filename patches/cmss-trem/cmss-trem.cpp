@@ -20,29 +20,36 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
 	const float rate_in = fmap(hw.GetAdcValue(CV_1), 0.1f, 20.f, Mapping::EXP);
 	const float depth = fastroot(daisysp::fmax(0.0001f, hw.GetAdcValue(CV_2)), 2);
+	const float width = fastpower(daisysp::fmax(0.0001f, hw.GetAdcValue(CV_3)), 2);
+	const float out_scale = pow10f(-12.0f * depth * 0.05f);
 
 	fonepole(rate, rate_in, 0.00008333f); // hard-coded tau = 0.25s for smoothing
 
 	lfo[LEFT].SetFreq(rate);
 	lfo[RIGHT].SetFreq(rate);
+	lfo[RIGHT].SetPhase(lfo[LEFT].GetPhase() + width * PI_F);
 	
-	for (size_t i = 0; i < size; i++)
-	{
-		// TODO: stereo width via out of phase LFO
-		// (will require different LFO class than daisysp)
-		float lfo_l = lfo[LEFT].Process() * 0.5f + 0.5f;
-		float lfo_r = lfo[RIGHT].Process() * 0.5f + 0.5f;
+for (size_t i = 0; i < size; i++)
+{
+	// unipolar 0-1
+	float lfo_l = lfo[LEFT].Process() * 0.5f + 0.5f;
+	float lfo_r = lfo[RIGHT].Process() * 0.5f + 0.5f;
 
-		OUT_L[i] = IN_L[i] * (1.0f - lfo_l * depth);
-		OUT_R[i] = IN_R[i] * (1.0f - lfo_r * depth);
-	}
+	// decibel scale, -60db to 24dB at max depth
+	lfo_l = pow10f((lfo_l * 42.0f - 18.0f) * depth * 0.05f);
+	lfo_r = pow10f((lfo_r * 42.0f - 18.0f) * depth * 0.05f);
+
+
+	OUT_L[i] = SoftClip(IN_L[i] * lfo_l) * out_scale;
+	OUT_R[i] = SoftClip(IN_R[i] * lfo_r) * out_scale;
+}
 }
 
 int main(void)
 {
 	hw.Init();
 	hw.SetAudioBlockSize(4); // number of samples handled per callback
-	hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+	hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_96KHZ);
 
 	lfo[LEFT].Init(hw.AudioSampleRate());
 	lfo[LEFT].SetWaveform(Oscillator::WAVE_SIN);
